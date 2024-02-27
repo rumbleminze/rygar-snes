@@ -58,7 +58,11 @@ nmi:
     PLY
     PLX
     PLA
+
     JML [BANK_SWITCH_LB]
+return_from_nes_nmi:
+    JSL translate_8_by_16_sprites
+    RTI
 
 _rti:
     rti

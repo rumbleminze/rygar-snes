@@ -1,3 +1,77 @@
+set_ppu_control_and_mask_to_0:
+    LDA VMAIN_STATE
+    AND #$FC
+    STA VMAIN
+
+    LDA NMITIMEN_STATE
+    AND #$7F
+    STA NMITIMEN
+
+    RTL
+
+update_ppu_control_values_from_a:
+    ; we only care about a few values for ppu control
+    ; these bits Nxxx xIAA
+    ; N = NMI enabled
+    ; I = Increment mode 0 = H, 1 = V
+    ; AA = Base Nametable
+    ;   this controls which quadrant of the TileMap the NES shows
+    ;   for us this controls what the HB of the the H/V Offset should be
+    ; 00 = 2000 = 0 H 0 V
+    ; 01 = 2400 = 1 H 0 V
+    ; 10 = 2800 = 0 H 1 V
+    ; 11 = 2C00 = 1 H 1 V
+
+    PHA
+    AND #$80
+    CMP #$80
+    BNE :+
+    jsl enable_nmi
+    bra :++
+:   jsl disable_nmi_no_store
+
+:   PLA
+    PHA
+    AND #$04
+    CMP #$04
+    BNE :+
+    jsl set_vram_increment_to_32_no_store
+    bra :++
+:   jsl set_vram_increment_to_1
+
+:   STZ HOFS_HB
+    STZ VOFS_HB
+    PLA
+    pha
+    AND #$03
+    CMP #$03
+    BEQ hvoffset11
+    CMP #$02
+    BEQ hvoffset10
+    CMP #$01
+    BEQ hvoffset01
+
+ hvoffset00:   
+    bra ret_from_update_ppu_control_values_from_a
+
+ hvoffset01:  
+    INC HOFS_HB
+    bra ret_from_update_ppu_control_values_from_a
+ 
+ hvoffset10:  
+    INC VOFS_HB
+    bra ret_from_update_ppu_control_values_from_a
+ 
+ hvoffset11:  
+    INC HOFS_HB
+    INC VOFS_HB
+    
+
+ret_from_update_ppu_control_values_from_a:
+    ; LDA INIDISP_STATE
+    ; STA INIDISP
+    pla
+    RTL
 
 set_ppu_control_to_0_and_store:
     LDA #$00
@@ -54,7 +128,18 @@ set_ppu_mask_to_accumulator:
     PLA
     RTL
     
-    
+
+update_vh_write_by_0b:
+  LDA VMAIN_STATE
+  AND #$FC
+  LDX $0B
+  BPL :+  
+  ORA #$01
+: STA $06
+  STA VMAIN
+
+  RTL
+
 update_ppu_mask_store_to_1e:
     LDA #$1E
     STA PPU_MASK_STATE
@@ -64,21 +149,28 @@ update_ppu_mask_store_to_1e:
     RTL
 
 update_values_for_ppu_mask:
-    STZ REUSABLE_CALC_BYTE
+    STZ TM_STATE
     ; we only care about bits 10 (sprites and 08 bg)
     LDA PPU_MASK_STATE
     AND #$10
-    BEQ :+
-    STA REUSABLE_CALC_BYTE
+    CMP #$10
+    BNE :+
+    STA TM_STATE
     : LDA PPU_MASK_STATE
     AND #$08
-    BEQ :+
+    CMP #$08
+    BNE :+
     LDA #$01
-    ORA REUSABLE_CALC_BYTE
-    STA REUSABLE_CALC_BYTE
-    : LDA REUSABLE_CALC_BYTE
+    ORA TM_STATE
+    STA TM_STATE
+    : 
+    
+    LDA TM_STATE
     STA TM
-    RTL
+    BEQ :+
+    LDA #$0F
+    STA INIDISP
+:   RTL
 
 enable_nmi_and_store:
     ; make sure any NMI flags are clear
@@ -97,6 +189,14 @@ enable_nmi_and_store:
     AND #$7F
     STA INIDISP
     STA INIDISP_STATE
+
+    RTL
+
+enable_nmi:
+    LDA RDNMI
+    LDA NMITIMEN_STATE
+    ORA #$80
+    STA NMITIMEN
 
     RTL
 

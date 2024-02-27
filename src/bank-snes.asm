@@ -141,7 +141,7 @@ initialize_registers:
   STA BG34NBA
   LDA #$01
   STA BGMODE
-  LDA #$22
+  LDA #$23
   STA BG1SC
 ;   LDA #$32
 ;   STA BG2SC
@@ -162,8 +162,8 @@ initialize_registers:
   LDA #$01
   STA MEMSEL
 ; Use #$04 to enable overscan if we can.
-  LDA #$04
-  ; LDA #$00
+  ; LDA #$04
+  LDA #$00
   STA SETINI
 
 
@@ -194,30 +194,33 @@ initialize_registers:
     LDA RDNMI
     JSL update_values_for_ppu_mask
     JSL infidelitys_scroll_handling
-    JSL setup_hdma    
+    ; JSL setup_hdma    
 
-  LDA #$7E
-  STA A1B3
-  LDA #$09
-  STA A1T3H
-  STZ A1T3L
+  ; LDA #$7E
+  ; STA A1B3
+  ; LDA #$09
+  ; STA A1T3H
+  ; STZ A1T3L
   
-  LDA #<(BG1HOFS)
-  ; LDA #$0D
-  STA BBAD3
-  LDA #$03
-  STA DMAP3
+  ; LDA #<(BG1HOFS)
+  ; ; LDA #$0D
+  ; STA BBAD3
+  ; LDA #$03
+  ; STA DMAP3
 
-  LDA #%00001000
-  STA HDMAEN
+  ; LDA #%00001000
+  ; STA HDMAEN
+
   .if ENABLE_MSU > 0
     ; JSL msu_nmi_check
     .byte $22, .lobyte(msu_nmi_check), .hibyte(msu_nmi_check), $e8
   .endif 
+
   JSR dma_oam_table
-  JSR disable_attribute_buffer_copy
-  JSR check_and_copy_attribute_buffer
-  JSR write_one_off_vrams
+  ; JSR disable_attribute_buffer_copy
+  ; JSR check_and_copy_attribute_buffer
+  ; JSR write_one_off_vrams
+  
   RTL
 
 clearvm:
@@ -256,11 +259,18 @@ clearvm:
   RTS
 
 clearvm_to_12:
+
+: LDA RDNMI
+  BPL :-
+
+  STZ NMITIMEN
+  JSL force_blank_no_store
+   
   setAXY16
   ldx #$2000
   stx VMADDL 
 	
-	lda #$0012
+	lda #$0000
 	
 	LDY #$0000
 	:
@@ -270,6 +280,7 @@ clearvm_to_12:
 		BNE :-
   
   setAXY8
+  JSL reset_inidisp
   RTS
 
 clear_zp:
@@ -285,12 +296,32 @@ clear_buffers:
   LDA #$00
   LDY #$00
 
-: STA $1A00, Y
-  STA $1700, Y
-  STA $1800, Y
-  STA $0800, Y
+: STA $0800, Y
   STA $0900, Y
   STA $0A00, Y
+  STA $0B00, Y
+  STA $0C00, Y
+  STA $0D00, Y
+  STA $0E00, Y
+  STA $0F00, Y
+  
+  STA $1000, Y
+  STA $1100, Y
+  STA $1200, Y
+  STA $1300, Y
+  STA $1400, Y
+  STA $1500, Y
+  STA $1600, Y
+  STA $1700, Y
+  
+  STA $1800, Y
+  STA $1900, Y
+  STA $1A00, Y
+  STA $1B00, Y
+  STA $1C00, Y
+  STA $1D00, Y
+  STA $1E00, Y
+  STA $1F00, Y
   DEY
   BNE :-
   RTS

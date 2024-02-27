@@ -60,7 +60,7 @@ palette_lookup:
 .byte $7E, $53 ; $37 
 .byte $9C, $4B ; $38 nyi
 .byte $B9, $4B ; $39 nyi
-.byte $00, $00 ; $3A nyi
+.byte $D7, $57 ; $3A nyi
 .byte $D6, $67 ; $3B light greenish blue
 .byte $B6, $7B ; $3C nyi
 .byte $00, $00 ; $3D nyi

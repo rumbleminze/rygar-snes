@@ -2,39 +2,26 @@
 .define DEBUG_MOD 0
 .define ENABLE_MSU 0
 
-
-; Value determines where we're at
-; 00 - title screen
-; 01 - Start/Continue
-; 02 - World 1-1 to 1-3
-; 03 - Level 1-4
-; 04 - 2-1 to 2-3
-; 05 - 2-4
-; 06 - 3-1 to 3-3
-; 07 - 3-4
-; 08 - 4-1
-CURRENT_WORLD_INX   = $A0
-
 PPU_MASK_STATE      = $0D
 PPU_CONTROL_STATE   = $0C
 
 ; SNES Register Value storage
 .define NMITIMEN_STATE  $1706
 .define VMAIN_STATE     $1705
-.define INIDISP_STATE    $1704
+.define INIDISP_STATE   $1704
 .define TM_STATE        $1707
-.define BANK_SWITCH_JMP  $0800
+.define BANK_SWITCH_JMP $0800
 
 HOFS_LB             = $11
-HOFS_HB             = $0804
+HOFS_HB             = $08A4
 
 VOFS_LB             = $10
-VOFS_HB             = $0805
+VOFS_HB             = $08A5
 
-REUSABLE_CALC_BYTE  = $0808
-LEVEL_SELECT_INDEX  = $0809
-CHEATS_ENABLED      = $080A
-CURRENT_ATTRIBUTES  = $03B0
+REUSABLE_CALC_BYTE  = $08A8
+LEVEL_SELECT_INDEX  = $08A9
+CHEATS_ENABLED      = $08AA
+CURRENT_ATTRIBUTES  = $08B0
 
 ; mostly actual nes stuff above
 ; all my stuff below
@@ -42,23 +29,21 @@ CURRENT_ATTRIBUTES  = $03B0
 SPRITE_LOOP_JUNK    = $E2
 tmp_dat             = $E2
 
-JMP_REDIRECT_LB     = $d0
-
 FULL_ATTRIBUTE_COPY_SRC_LB = $7D
 FULL_ATTRIBUTE_COPY_SRC_HB = $7E
 FULL_ATTRIBUTE_COPY_HB = $7F
 
-PPU_CURR_VRAM_ADDR  = $0912
-PPU_TILE_COUNT      = $0914
-PPU_TILE_ATTR       = $0916
-PPU_COL_OFFSET      = $0918
-PPU_ROW_OFFSET      = $091A
-TILES_TO_WRITE      = $091C
-TILES_TO_WRITE_HB   = $091D
-BANK_SWITCH_LB      = $0920
-BANK_SWITCH_HB      = $0921
-BANK_SWITCH_DB      = $0922
-ACTIVE_NES_BANK     = $0923 ; maybe?
+PPU_CURR_VRAM_ADDR  = $0992
+PPU_TILE_COUNT      = $0994
+PPU_TILE_ATTR       = $0996
+PPU_COL_OFFSET      = $0998
+PPU_ROW_OFFSET      = $099A
+TILES_TO_WRITE      = $099C
+TILES_TO_WRITE_HB   = $099D
+BANK_SWITCH_LB      = $09A0
+BANK_SWITCH_HB      = $09A1
+BANK_SWITCH_DB      = $09A2
+ACTIVE_NES_BANK     = $09A3 ; maybe?
 
 FULL_ATTRIBUTE_QUARTER_COUNTER = $0930
 FAQ_OFFSET = $0931
@@ -85,7 +70,8 @@ EXTRA_VRAM_UPDATE   = $0980
 
 
 SNES_OAM_TRANSLATE_NEEDED = $12F0
-SNES_OAM_START      = $1300
+SNES_OAM_START       = $1000
+SNES_OAM_SECOND_BLOCK = SNES_OAM_START + $100
 
 ATTRIBUTE_HOLDING   = $6600
 

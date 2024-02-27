@@ -15,11 +15,11 @@ intro_screen_data:
 
 ; .byte $4C, $23, $22, $34, $3c, $31, $3b, $34, $41, $42, $ff             ; MEMBLERS
 
-.byte $d9, $cc, $dd, $00, $68, $81, $6a, $ff ; Version (REV0)
+.byte $78, $23, $d9, $cc, $dd, $00, $68, $81, $69, $ff ; Version (REV0)
 .byte $ff, $ff
 
 write_intro_palette:
-    STZ CGADD
+    STZ CGADD    
     LDA #$00
     STA CGDATA
     STA CGDATA
@@ -27,12 +27,110 @@ write_intro_palette:
     LDA #$FF
     STA CGDATA
     STA CGDATA
+
+    LDA #$B5
+    STA CGDATA
+    LDA #$56
+    STA CGDATA
     
+    LDA #$29
     STA CGDATA
+    LDA #$25
+    STA CGDATA
+
+
+; sprite default colors
+    LDA #$80
+    STA CGADD
+    LDA #$D0
+    STA CGDATA
+    LDA #$00
     STA CGDATA
     
+    LDA #$b5
     STA CGDATA
+    LDA #$56
     STA CGDATA
+
+    LDA #$d0
+    STA CGDATA
+    LDA #$00
+    STA CGDATA
+    
+    LDA #$00
+    STA CGDATA
+    LDA #$00
+    STA CGDATA
+
+    
+    LDA #$90
+    STA CGADD
+    LDA #$D0
+    STA CGDATA
+    LDA #$00
+    STA CGDATA
+    
+    LDA #$00
+    STA CGDATA
+    LDA #$00
+    STA CGDATA
+
+    LDA #$d6
+    STA CGDATA
+    LDA #$10
+    STA CGDATA
+    
+    LDA #$41
+    STA CGDATA
+    LDA #$02
+    STA CGDATA
+
+    
+    LDA #$A0
+    STA CGADD
+    LDA #$D0
+    STA CGDATA
+    LDA #$00
+    STA CGDATA
+    
+    LDA #$00
+    STA CGDATA
+    LDA #$00
+    STA CGDATA
+
+    LDA #$33
+    STA CGDATA
+    LDA #$01
+    STA CGDATA
+
+    LDA #$D0
+    STA CGDATA
+    LDA #$00
+    STA CGDATA
+
+    
+    LDA #$B0
+    STA CGADD
+    LDA #$D0
+    STA CGDATA
+    LDA #$00
+    STA CGDATA
+    
+    LDA #$33
+    STA CGDATA
+    LDA #$01
+    STA CGDATA
+
+    LDA #$33
+    STA CGDATA
+    LDA #$01
+    STA CGDATA
+    
+    LDA #$6a
+    STA CGDATA
+    LDA #$00
+    STA CGDATA
+
     RTS
 
 write_intro_tiles:
@@ -69,6 +167,9 @@ do_intro:
     LDA VMAIN_STATE
     AND #$0F
     STA VMAIN
+    LDA #$8F
+    STA INIDISP
+    STA INIDISP_STATE
 
     STZ TILE_CHUNK_COUNT
     LDA #$01
@@ -100,6 +201,8 @@ do_intro:
     BNE :--
 
     LDA INIDISP_STATE
+    ORA #$0F
+    STA INIDISP_STATE
     STA INIDISP
 
     RTS

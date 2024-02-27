@@ -19,10 +19,15 @@ load_tiles:
     LDA #$A0
     PHA
     PLB
+:   LDA RDNMI
+    BPL :-
 
     LDA #$80
     STA VMAIN
 
+    STZ NMITIMEN
+    JSL force_blank_no_store
+    
     LDA #$01
     STA DMAP5
 
@@ -88,8 +93,6 @@ load_tiles:
     AND #$F8
     STA VMADDL
 
-
-
     LDA #$20
     STA MDMAEN
     
@@ -103,8 +106,12 @@ load_tiles:
     STA MDMAEN
     BRA :-
 
-:   LDA VMAIN_STATE
+:   LDA NMITIMEN_STATE
+    STA NMITIMEN
+    LDA VMAIN_STATE
     STA VMAIN
+    LDA INIDISP_STATE
+    STA INIDISP
 
     PLB
     RTL

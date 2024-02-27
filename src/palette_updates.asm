@@ -12,14 +12,14 @@ write_palette_data:
   LDY #$00
   STZ CURR_PALETTE_ADDR
   STZ CGADD
-  ; Kid Icarus stores the current palettes at 0x0390
-  ; BG is 0390 - 039F
-  ; Sprites are 03A0 - 03AF
+  ; Rygar stores the current palettes at 0x0330
+  ; BG is 0330 - 033F
+  ; Sprites are 0340 - 034F
 
   ; lookup our 2 byte color from palette_lookup, color * 2
   ; Our palettes are written by writing to CGDATA
 palette_entry:
-  LDA $0390, Y
+  LDA $0330, Y
   ASL A
   TAX
   LDA palette_lookup, X

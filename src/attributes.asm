@@ -1,155 +1,155 @@
-nes_951d_copy:
-  setAXY16
-  LDA #$80
-  STA VMAIN
+; nes_951d_copy:
+;   setAXY16
+;   LDA #$80
+;   STA VMAIN
 
-  LDA $0481
-  STA VMADDL ; STA PpuAddr_2006         
-  STA PPU_CURR_VRAM_ADDR
-  LDY #$0000                 
-: LDA $0483,Y 
-  AND #$00FF
-  CLC
-  ADC PPU_TILE_ATTR
-  STA VMDATAL ; PpuData_2007         
-  INY       
-  INC PPU_CURR_VRAM_ADDR                 
-  CPY #$40                 
-  BCC :-
+;   LDA $0481
+;   STA VMADDL ; STA PpuAddr_2006         
+;   STA PPU_CURR_VRAM_ADDR
+;   LDY #$0000                 
+; : LDA $0483,Y 
+;   AND #$00FF
+;   CLC
+;   ADC PPU_TILE_ATTR
+;   STA VMDATAL ; PpuData_2007         
+;   INY       
+;   INC PPU_CURR_VRAM_ADDR                 
+;   CPY #$40                 
+;   BCC :-
     
-  setAXY8
-  LDA VMAIN_STATE
-  STA VMAIN
-  RTL
+;   setAXY8
+;   LDA VMAIN_STATE
+;   STA VMAIN
+;   RTL
 
-veritcal_scroll_attribute_handle:
-nes_9537_copy:
+; veritcal_scroll_attribute_handle:
+; nes_9537_copy:
          
-  JSR nes96c6_copy        
-  LDA $00                  
-  CLC                      
-  ADC #$C0
-  STA $01                  
-  LDA #$23                 
-  STA $02                  
-  LDA $1A                  
-  AND #$01                 
-  BNE :+        
-  LDA #$27         
-  STA $02        
-: LDA $02                  
-  STA ATTR_NES_VM_ADDR_HB      
-  LDA $01                 
-  STA ATTR_NES_VM_ADDR_LB      
-  JSR nes96c6_copy              
-  TAX                     
-  LDY #$00  
-: LDA $03B0,X              
-  STA ATTR_NES_VM_ATTR_START, Y     
-  INX                      
-  INY     
-  CPY #$08                 
-  BNE :-         
+;   JSR nes96c6_copy        
+;   LDA $00                  
+;   CLC                      
+;   ADC #$C0
+;   STA $01                  
+;   LDA #$23                 
+;   STA $02                  
+;   LDA $1A                  
+;   AND #$01                 
+;   BNE :+        
+;   LDA #$27         
+;   STA $02        
+; : LDA $02                  
+;   STA ATTR_NES_VM_ADDR_HB      
+;   LDA $01                 
+;   STA ATTR_NES_VM_ADDR_LB      
+;   JSR nes96c6_copy              
+;   TAX                     
+;   LDY #$00  
+; : LDA $03B0,X              
+;   STA ATTR_NES_VM_ATTR_START, Y     
+;   INX                      
+;   INY     
+;   CPY #$08                 
+;   BNE :-         
 
-  STY ATTR_NES_VM_COUNT
+;   STY ATTR_NES_VM_COUNT
 
-  LDA #$00
-  STA ATTR_NES_VM_ATTR_START, Y          
-  INC ATTR_NES_HAS_VALUES
-  RTL 
-nes96c6_copy:
-  LDA VOFS_LB          
-  AND #$E0                 
-  LSR A                    
-  LSR A                    
-  STA $00                  
-  RTS 
+;   LDA #$00
+;   STA ATTR_NES_VM_ATTR_START, Y          
+;   INC ATTR_NES_HAS_VALUES
+;   RTL 
+; nes96c6_copy:
+;   LDA VOFS_LB          
+;   AND #$E0                 
+;   LSR A                    
+;   LSR A                    
+;   STA $00                  
+;   RTS 
 
-  handle_title_screen_a236_attributes:
-    LDA $A0
-    PHA
-    PLB
-    ; PUSH START BUTTON, this whole screen is just $AA
-    LDA #$23
-    STA ATTR_NES_VM_ADDR_HB
-    LDA #$C0
-    STA ATTR_NES_VM_ADDR_LB
+;   handle_title_screen_a236_attributes:
+;     LDA $A0
+;     PHA
+;     PLB
+;     ; PUSH START BUTTON, this whole screen is just $AA
+;     LDA #$23
+;     STA ATTR_NES_VM_ADDR_HB
+;     LDA #$C0
+;     STA ATTR_NES_VM_ADDR_LB
     
-    LDX #$02
+;     LDX #$02
 
-    : LDY #$00
-    LDA #$AA
+;     : LDY #$00
+;     LDA #$AA
 
-    : STA ATTR_NES_VM_ATTR_START, Y
-    INY
-    CPY #$20
-    BNE :-
+;     : STA ATTR_NES_VM_ATTR_START, Y
+;     INY
+;     CPY #$20
+;     BNE :-
 
-    LDA #$00
-    STA ATTR_NES_VM_ATTR_START, Y
+;     LDA #$00
+;     STA ATTR_NES_VM_ATTR_START, Y
 
-    LDA #$20
-    STA ATTR_NES_VM_COUNT
+;     LDA #$20
+;     STA ATTR_NES_VM_COUNT
     
-    LDA #$01
-    STA ATTR_NES_HAS_VALUES
+;     LDA #$01
+;     STA ATTR_NES_HAS_VALUES
 
-    PHX
-    JSL convert_nes_attributes_and_immediately_dma_them
-    PLX
+;     PHX
+;     JSL convert_nes_attributes_and_immediately_dma_them
+;     PLX
 
-    DEX
-    BEQ :+
+;     DEX
+;     BEQ :+
 
-    LDA #$E0
-    STA ATTR_NES_VM_ADDR_LB
-    LDA #$23
-    STA ATTR_NES_VM_ADDR_HB  
-    BRA :--
+;     LDA #$E0
+;     STA ATTR_NES_VM_ADDR_LB
+;     LDA #$23
+;     STA ATTR_NES_VM_ADDR_HB  
+;     BRA :--
 
-    ; Now for title graphics
-    : LDA #$00
-    STA $46
+;     ; Now for title graphics
+;     : LDA #$00
+;     STA $46
 
-    LDA #$27
-    STA ATTR_NES_VM_ADDR_HB
-    LDA #$C0
-    STA ATTR_NES_VM_ADDR_LB
-    LDY #$00
+;     LDA #$27
+;     STA ATTR_NES_VM_ADDR_HB
+;     LDA #$C0
+;     STA ATTR_NES_VM_ADDR_LB
+;     LDY #$00
 
-    : LDX #$00
-    : LDA title_screen_attributes, Y
-    STA ATTR_NES_VM_ATTR_START, X
-    INY
-    INX
-    CPX #$20
-    BNE :-
+;     : LDX #$00
+;     : LDA title_screen_attributes, Y
+;     STA ATTR_NES_VM_ATTR_START, X
+;     INY
+;     INX
+;     CPX #$20
+;     BNE :-
 
-    LDA #$00
-    STA ATTR_NES_VM_ATTR_START, X
+;     LDA #$00
+;     STA ATTR_NES_VM_ATTR_START, X
 
-    LDA #$20
-    STA ATTR_NES_VM_COUNT
+;     LDA #$20
+;     STA ATTR_NES_VM_COUNT
     
-    LDA #$01
-    STA ATTR_NES_HAS_VALUES
+;     LDA #$01
+;     STA ATTR_NES_HAS_VALUES
 
-    PHX
-    PHY
-    JSL convert_nes_attributes_and_immediately_dma_them
-    PLY
-    PLX
+;     PHX
+;     PHY
+;     JSL convert_nes_attributes_and_immediately_dma_them
+;     PLY
+;     PLX
 
-    CPY #$40
-    BEQ :+
+;     CPY #$40
+;     BEQ :+
 
-    LDA #$E0
-    STA ATTR_NES_VM_ADDR_LB
-    LDA #$27
-    STA ATTR_NES_VM_ADDR_HB  
-    BRA :--
+;     LDA #$E0
+;     STA ATTR_NES_VM_ADDR_LB
+;     LDA #$27
+;     STA ATTR_NES_VM_ADDR_HB  
+;     BRA :--
 
-: RTL
+; : RTL
 
 title_screen_attributes:
 .byte $00, $00, $00, $00, $80, $AA, $A2, $A0, $AA, $22, $00, $00, $08, $0A, $0A, $0A
@@ -588,7 +588,6 @@ nes_eb21_replacement:
   ; do my own stuff now
   ; would like to do this here too, but need to find the right spot everywhere
   ; so for now i'm doing it at the end of NMI
-  ; JSR translate_nes_sprites_to_oam
   JSR check_and_copy_nes_attributes_to_buffer
 
   RTL

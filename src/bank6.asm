@@ -240,23 +240,121 @@
 .byte $16, $27, $0F, $22, $36, $0F, $1A, $37, $22, $16, $30, $0F, $27, $30, $06, $08
 .byte $3A, $06, $08, $3A, $06, $08, $3A, $06, $08, $3A, $06, $08, $3A, $06, $08, $3A
 .byte $06, $08, $3A, $06, $08, $3A, $06, $08, $3A, $27, $22, $12, $0F, $16, $22, $22
-.byte $22, $22, $22, $22, $22, $22, $22, $22, $22, $A6, $0E, $F0, $2E, $A9, $00, $9D
-.byte $20, $03, $85, $0E, $85, $0F, $AE, $0E, $00, $EE, $0E, $00, $BD, $20, $03, $D0
-.byte $1B, $AE, $02, $20, $A9, $3F, $8D, $06, $20, $A9, $00, $8D, $06, $20, $8D, $06
-.byte $20, $8D, $06, $20, $8D, $20, $03, $85, $0E, $85, $0F, $60, $85, $08, $30, $0A
-.byte $46, $08, $20, $34, $8D, $20, $57, $8D, $F0, $CC, $29, $7F, $F0, $0C, $46, $08
-.byte $20, $34, $8D, $20, $67, $8D, $E6, $0F, $D0, $BC, $A4, $0F, $A9, $08, $85, $08
+.byte $22, $22, $22, $22, $22, $22, $22, $22, $22
+
+  LDX $0E
+  BEQ :+
+  LDA #$00
+  STA $0320,X
+  STA $0E
+  STA $0F
+nes_8CB6:
+  LDX $0E
+  INC $0E
+  nops 2
+  LDA $0320,X
+  BNE :++
+  LDX RDNMI ; PpuStatus_2002
+  LDA #$3F
+  STA VMADDH ; PpuAddr_2006
+  LDA #$00
+  STA VMADDL ; PpuAddr_2006
+  STA VMADDH ; PpuAddr_2006
+  STA VMADDL ; PpuAddr_2006
+  STA $0320
+  STA $0E
+  STA $0F
+: RTS
+
+: STA $08
+  BMI :+
+  LSR $08
+  JSR $8D34
+  JSR $8D57
+  BEQ nes_8CB6
+: AND #$7F
+  BEQ :+
+  LSR $08
+  JSR $8D34
+  JSR $8D67
+  INC $0F
+  BNE nes_8CB6
+: LDY $0F
+  LDA #$08
+  STA $08
+  LDX $0E
+;   LDA #$30
+;   STA PpuControl_2000
+: nops 5
+  LDA RDNMI ; PpuStatus_2002
+  LDA $0320,X
+  INX
+  STA VMADDH ; PpuAddr_2006
+  LDA $0320,X
+  STA VMADDL ; PpuAddr_2006
+  CLC
+  ADC #$08
+  ORA #$C0
+  STA $0320,X
+  DEX
+  LDA $0330,Y
+  INY
+  STA VMDATAL ; PpuData_2007
+  DEC $08
+  BNE :-
+  STY $0F
+  INC $0E
+  INC $0E
+  JMP $8CB6
+
+; 8D34 
+  PHA
+
+  ; check if we're writing H of V
+  LDA $0C
+  AND #$7B
+  BCC :+
+  ORA #$04
+: JSL update_ppu_control_values_from_a 
+  ; STA $2000
+
+  PLA
+  nops 2    ; LDX $2002
+
+  LDX $0E
+  LDA $0320,X
+  STA VMADDH
+  INX
+  LDA $0320,X
+  STA VMADDL
+  INX
+  STX $0E
+  RTS
 
 
-; 8D00 - bank 6
-.byte $A6, $0E, $A9, $30, $8D, $00, $20, $AD, $02, $20, $BD, $20, $03, $E8, $8D, $06
-.byte $20, $BD, $20, $03, $8D, $06, $20, $18, $69, $08, $09, $C0, $9D, $20, $03, $CA
-.byte $B9, $30, $03, $C8, $8D, $07, $20, $C6, $08, $D0, $D7, $84, $0F, $E6, $0E, $E6
-.byte $0E, $4C, $B6, $8C, $48, $A5, $0C, $29, $7B, $90, $02, $09, $04, $8D, $00, $20
-.byte $68, $AE, $02, $20, $A6, $0E, $BD, $20, $03, $8D, $06, $20, $E8, $BD, $20, $03
-.byte $8D, $06, $20, $E8, $86, $0E, $60, $A6, $0F, $BD, $30, $03, $8D, $07, $20, $E8
-.byte $C6, $08, $D0, $F5, $86, $0F, $60, $A6, $0F, $BD, $30, $03, $8D, $07, $20, $C6
-.byte $08, $30, $F9, $E6, $0F, $60, $1D, $06, $82, $8D, $71, $8F, $86, $8F, $9A, $8F
+; 8D57 - Copy data from $0330 to PPU
+; to current PPU Addr
+;   JSL write_palette_data
+;   nops 2
+  LDX $0F
+: LDA $0330,X
+  STA VMDATAL
+  INX
+  DEC $08
+  BNE :-
+  STX $0F
+  RTS
+
+  LDX $0F
+  LDA $0330,X
+: STA $2007
+  DEC $08
+  BMI :-
+  INC $0F
+  RTS
+
+
+.byte $1D, $06, $82, $8D, $71, $8F, $86, $8F, $9A, $8F
 .byte $D0, $90, $0C, $05, $10, $B4, $B3, $B3, $B3, $B3, $B3, $B3, $B3, $B3, $B3, $B3
 .byte $B5, $18, $06, $04, $B4, $B3, $B3, $B3, $B3, $B3, $B3, $B3, $B3, $B3, $B3, $B5
 .byte $B2, $D7, $D6, $DB, $CC, $D5, $DB, $D0, $C8, $D3, $00, $B2, $01, $07, $04, $B2
