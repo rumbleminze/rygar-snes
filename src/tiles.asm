@@ -31,14 +31,6 @@ load_tiles:
     LDA #$01
     STA DMAP5
 
-    LDA TILE_DEST_LB_SETS
-    AND #$07
-    TAY
-
-    LDA TILE_SRC_LB_BANK
-    AND #$F8
-    STA A1T5L
-
     LDA TILE_SRC_HB
     SEC
     SBC #$80
@@ -46,7 +38,16 @@ load_tiles:
     ASL 
     CLC
     ADC #$80
+    STA TILE_SRC_HB
 
+    LDA TILE_SRC_LB_BANK
+    AND #$F8
+    CLC
+    ASL
+    STA A1T5L
+    BCC :+
+    INC TILE_SRC_HB
+:   LDA TILE_SRC_HB
     STA A1T5H
 
     LDA TILE_SRC_LB_BANK
@@ -68,6 +69,15 @@ load_tiles:
     ; 00 is special
     BNE :+   
     INC TILE_WORK_SIZE_HB
+:    
+    LDA TILE_DEST_LB_SETS
+    AND #$07
+    BEQ :++
+    TAY
+:   INC TILE_WORK_SIZE_HB
+    DEY
+    BNE :-
+
 
     ; multiply the size by 16 to get the actual size.
 :   LDX #$05
@@ -79,8 +89,9 @@ load_tiles:
     BCC :-
     INC TILE_WORK_SIZE_HB
     BRA :-
-
 :   LDA TILE_WORK_SIZE_HB
+    
+
     STA DAS5H
 
     LDA TILE_WORK_SIZE_LB
@@ -93,20 +104,18 @@ load_tiles:
     AND #$F8
     STA VMADDL
 
-    LDA #$20
-    STA MDMAEN
+    ; LDA #$20
+    ; STA MDMAEN
     
-:   DEY
-    BMI :+
+
     LDA TILE_WORK_SIZE_HB
     STA DAS5H
     LDA TILE_WORK_SIZE_LB
     STA DAS5L
     LDA #$20
     STA MDMAEN
-    BRA :-
-
-:   LDA NMITIMEN_STATE
+    
+    LDA NMITIMEN_STATE
     STA NMITIMEN
     LDA VMAIN_STATE
     STA VMAIN

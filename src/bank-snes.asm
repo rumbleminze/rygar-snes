@@ -141,7 +141,7 @@ initialize_registers:
   STA BG34NBA
   LDA #$01
   STA BGMODE
-  LDA #$23
+  LDA #$21
   STA BG1SC
 ;   LDA #$32
 ;   STA BG2SC
@@ -162,8 +162,8 @@ initialize_registers:
   LDA #$01
   STA MEMSEL
 ; Use #$04 to enable overscan if we can.
-  ; LDA #$04
-  LDA #$00
+  LDA #$04
+  ; LDA #$00
   STA SETINI
 
 
@@ -194,22 +194,22 @@ initialize_registers:
     LDA RDNMI
     JSL update_values_for_ppu_mask
     JSL infidelitys_scroll_handling
-    ; JSL setup_hdma    
+    ; JSL update_screen_scroll
+    JSL setup_hdma    
 
-  ; LDA #$7E
-  ; STA A1B3
-  ; LDA #$09
-  ; STA A1T3H
-  ; STZ A1T3L
+  LDA #$7E
+  STA A1B3
+  LDA #$09
+  STA A1T3H
+  STZ A1T3L
   
-  ; LDA #<(BG1HOFS)
-  ; ; LDA #$0D
-  ; STA BBAD3
-  ; LDA #$03
-  ; STA DMAP3
+  LDA #<(BG1HOFS)
+  STA BBAD3
+  LDA #$03
+  STA DMAP3
 
-  ; LDA #%00001000
-  ; STA HDMAEN
+  LDA #%00001000
+  STA HDMAEN
 
   .if ENABLE_MSU > 0
     ; JSL msu_nmi_check
@@ -257,6 +257,10 @@ clearvm:
   LDA VMAIN_STATE
   STA VMAIN
   RTS
+
+clearvm_to_12_long:
+  JSR clearvm_to_12
+  RTL
 
 clearvm_to_12:
 

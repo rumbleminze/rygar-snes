@@ -92,8 +92,18 @@
   JMP $C08F
 
 .byte $31, $39, $38, $37, $20, $63, $6F, $70, $79, $72, $69, $67, $68, $74
-.byte $20, $54, $45, $43, $4D, $4F, $20, $4C, $74, $64, $2E, $00, $00, $1E, $00, $0A
-.byte $00, $06, $06
+.byte $20, $54, $45, $43, $4D, $4F, $20, $4C, $74, $64, $2E
+
+; default values for inventory etc.
+; Tone LB
+; Tone HB
+; Last LB
+; Last HB
+; MAX HP
+; HP
+; original values
+; .byte $00, $00, $1E, $00, $0A, $00, $06, $06
+.byte $00, $00, $1E, $0F, $0A, $0F, $18, $18
 
   nops 3 ; LDX PpuStatus_2002
   STA VMADDH ; PpuAddr_2006
@@ -102,8 +112,10 @@
   LDA #$00
   LDX #$03
   LDY #$C0
-  JSR $C0C9
+  JSR @c0c9
+  ; 40 more for attributes
   LDY #$40
+@c0c9:
 : STA VMDATAL ; PpuData_2007
   DEY
   BNE :-
@@ -553,17 +565,19 @@
   nops 2 ; LDA PpuStatus_2002
   LDA $0A
   TAX
-  BEQ :++
-  LDA $05
-  STA VMADDH ; PpuAddr_2006
-  LDA $04
-  STA VMADDL ; PpuAddr_2006
-: LDA ($08),Y
-  INY
-  STA VMDATAL ; PpuData_2007
-  DEX
-  BNE :-
-  LDA #$04
+  BEQ :+
+  JSR @handle_vmdata_writes
+  nops 18
+;   LDA $05
+;   STA VMADDH ; PpuAddr_2006
+;   LDA $04
+;   STA VMADDL ; PpuAddr_2006
+; : LDA ($08),Y
+;   INY
+;   STA VMDATAL ; PpuData_2007
+;   DEX
+;   BNE :-
+;   LDA #$04
 : EOR $05
 
 .byte $AA, $24, $0B, $70, $0D, $10, $15, $8A, $29, $24, $85, $05, $A9, $1F
@@ -1492,10 +1506,26 @@
     PLA
     RTS
 
+; handle VMDATA Writes and hijack attributes
+@handle_vmdata_writes:
+    LDA $05
+    STA VMADDH
+    LDA $04
+    STA VMADDL
+
+:   LDA ($08),Y
+    INY
+    STA VMDATAL ; PpuData_2007
+    DEX
+    BNE :-
+    LDA #$04
+
+    RTS
+
 ; .byte $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF
-.byte $FF, $00, $FF, $00, $FF; , $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00
-.byte $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF
-.byte $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00
+; .byte $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00
+; .byte $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF
+.byte $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF ;, $00
 .byte $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF
 .byte $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00
 .byte $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF

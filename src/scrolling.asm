@@ -34,6 +34,18 @@ no_scroll_screen_enable:
   STA PPU_CONTROL_STATE
   RTL 
 
+update_screen_scroll:
+  LDA HOFS_HB
+  STA BG1HOFS
+  LDA HOFS_LB
+  STA BG1HOFS
+
+  LDA VOFS_HB
+  STA BG1VOFS
+  LDA VOFS_LB
+  STA BG1VOFS
+
+  RTL
 
 infidelitys_scroll_handling:
   LDA PPU_CONTROL_STATE
@@ -96,6 +108,7 @@ setup_hdma:
   LDA HOFS_LB
   STA $0901
   STA $0906
+  STA $090B
   LDA PPU_CONTROL_STATE
   STA $0902
   STA $0907
@@ -105,7 +118,7 @@ setup_hdma:
   STA $0904
   STA $0909
   STA $090E
-  STZ $090B
+  ; STZ $090B
   STZ $090F
 
   RTL

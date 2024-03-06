@@ -21,8 +21,21 @@
 
 
 ; 8100 - bank 6
-.byte $18, $85, $0D, $E6, $41, $60, $A9, $11, $20, $00, $CD, $A9, $20, $20, $B3, $C0
-.byte $A9, $24, $20, $B3, $C0, $A9, $00, $A2, $0F, $9D, $92, $04, $CA, $10, $FA, $A2
+.byte $18, $85, $0D, $E6, $41, $60
+
+; DEATH Oh No!  Get gud
+  LDA #$11
+  JSR $CD00 ; don't know what this does
+
+  ; clear out the full tilemap to #$00
+  JSL clearvm_to_12_long
+  nops 6
+;   LDA #$20
+;   JSR $C0B3
+;   LDA #$24
+;   JSR $C0B3
+  
+.byte $A9, $00, $A2, $0F, $9D, $92, $04, $CA, $10, $FA, $A2
 .byte $0D, $9D, $BE, $05, $CA, $10, $FA, $A2, $1E, $9D, $01, $03, $CA, $10, $FA, $A9
 .byte $06, $85, $CB, $A9, $00, $85, $C3, $85, $C2, $8D, $92, $04, $A9, $08, $8D, $01
 .byte $03, $A9, $EE, $25, $C0, $85, $C0, $A5, $1C, $4A, $AA, $BD, $5D, $81, $D0, $08
@@ -78,8 +91,24 @@
 
 
 ; 8400 - bank 6
-.byte $29, $3B, $09, $04, $8D, $00, $20, $AD, $02, $20, $A5, $01, $29, $27, $8D, $06
-.byte $20, $A5, $00, $8D, $06, $20, $A2, $1D, $A9, $00, $8D, $07, $20, $CA, $10, $FA
+.byte $29, $3B, $09, $04
+
+  JSL set_vram_increment_to_32_no_store
+;   STA PpuControl_2000
+;   LDA PpuStatus_2002
+  nops 2
+
+  LDA $01
+  AND #$27
+  STA VMADDH
+  LDA $00
+  STA VMADDL
+  LDX #$1D
+  LDA #$00
+: STA VMDATAL  ; PpuData_2007
+  DEX
+  BPL :-
+
 .byte $A6, $00, $E8, $E0, $20, $90, $08, $A5, $01, $49, $04, $85, $01, $A2, $00, $86
 .byte $00, $C6, $02, $10, $C9, $E6, $41, $60, $18, $A9, $6C, $20, $0F, $8A, $E6, $41
 .byte $60, $A5, $0F, $05, $0E, $D0, $05, $20, $18, $86, $E6, $41, $60, $A5, $0F, $D0
@@ -267,19 +296,24 @@ nes_8CB6:
 : RTS
 
 : STA $08
-  BMI :+
-  LSR $08
-  JSR $8D34
-  JSR $8D57
-  BEQ nes_8CB6
-: AND #$7F
-  BEQ :+
-  LSR $08
-  JSR $8D34
-  JSR $8D67
-  INC $0F
-  BNE nes_8CB6
-: LDY $0F
+  ; replacing the next 28 bytes
+  JMP vmdata_write
+  nops 25
+;   BMI :+
+;   LSR $08
+;   JSR $8D34
+;   JSR $8D57
+;   BEQ nes_8CB6
+; : AND #$7F
+;   BEQ :+
+;   LSR $08
+;   JSR $8D34
+;   JSR $8D67
+;   INC $0F
+;   BNE nes_8CB6
+; : 
+vmdata_write_return:  
+  LDY $0F
   LDA #$08
   STA $08
   LDX $0E
@@ -1259,12 +1293,65 @@ nes_8CB6:
 
 
 ; BD00 - bank 6
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+vmdata_write:
+  BMI :++
+  LSR $08
+  JSR replacement_8d34
+  CMP #$3F
+  BNE :+
+  JSL write_palette_data
+: JSR $8D57
+  BNE :+
+  JMP nes_8CB6
+
+: AND #$7F
+  BEQ :+
+  LSR $08
+  JSR replacement_8d34
+  CMP #$3F
+  BNE :+
+  JSL write_palette_data
+: JSR $8D67
+  INC $0F
+  BNE :+
+  JMP nes_8CB6
+: JMP vmdata_write_return
+
+replacement_8d34:
+  ; check if we're writing H of V
+  PHA
+  LDA $0C
+  AND #$7B
+  BCC :+
+  ORA #$04
+: JSL update_ppu_control_values_from_a 
+  ; STA $2000
+
+  PLA
+  nops 2    ; LDX $2002
+
+  LDX $0E
+  LDA $0320,X
+  PHA
+
+  STA VMADDH
+  INX
+  LDA $0320,X
+  STA VMADDL
+  INX
+  STX $0E
+
+  PLA
+
+  RTS
+
+
+; .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+; .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+.byte $FF, $FF, $FF, $FF, $FF, $FF; , $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+; .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+; .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+; .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF

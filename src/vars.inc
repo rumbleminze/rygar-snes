@@ -12,10 +12,10 @@ PPU_CONTROL_STATE   = $0C
 .define TM_STATE        $1707
 .define BANK_SWITCH_JMP $0800
 
-HOFS_LB             = $11
+HOFS_LB             = $10
 HOFS_HB             = $08A4
 
-VOFS_LB             = $10
+VOFS_LB             = $11
 VOFS_HB             = $08A5
 
 REUSABLE_CALC_BYTE  = $08A8
@@ -81,6 +81,7 @@ ATTR_NES_VM_ADDR_LB = $09A2
 ATTR_NES_VM_COUNT   = $09A3
 ATTR_NES_VM_ATTR_START = $09A4
 
+WRITING_PALETTE     = $17D0
 CURR_PALETTE_ADDR   = $17E0
 ATTRIBUTE_DMA       = $17F0
 ATTR_DMA_SRC_HB     = $17F2
