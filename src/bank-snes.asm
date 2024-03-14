@@ -163,7 +163,7 @@ initialize_registers:
   STA MEMSEL
 ; Use #$04 to enable overscan if we can.
   LDA #$04
-  ; LDA #$00
+  LDA #$00
   STA SETINI
 
 
@@ -172,13 +172,13 @@ initialize_registers:
 
 ;   JSR zero_attribute_buffer
 
-;   STZ ATTR_NES_HAS_VALUES
-;   STZ ATTR_NES_VM_ADDR_HB
-;   STZ ATTR_NES_VM_ADDR_LB
-;   STZ ATTR_NES_VM_ATTR_START
-;   STZ ATTRIBUTE_DMA
-;   STZ COL_ATTR_HAS_VALUES
-;   STZ COLUMN_1_DMA
+  STZ ATTR_NES_HAS_VALUES
+  STZ ATTR_NES_VM_ADDR_HB
+  STZ ATTR_NES_VM_ADDR_LB
+  STZ ATTR_NES_VM_ATTR_START
+  STZ ATTRIBUTE_DMA
+  STZ COL_ATTR_HAS_VALUES
+  STZ COLUMN_1_DMA
   JSL upload_sound_emulator_to_spc
   ; JSL load_base_tiles
   JSR do_intro
@@ -220,7 +220,7 @@ initialize_registers:
   ; JSR disable_attribute_buffer_copy
   ; JSR check_and_copy_attribute_buffer
   ; JSR write_one_off_vrams
-  
+  JSR check_and_copy_nes_attributes_to_buffer
   RTL
 
 clearvm:

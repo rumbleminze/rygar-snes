@@ -201,7 +201,7 @@ do_intro:
     BNE :--
 
     LDA INIDISP_STATE
-    ORA #$0F
+    ORA #$8F
     STA INIDISP_STATE
     STA INIDISP
 

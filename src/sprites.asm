@@ -1,4 +1,5 @@
 translate_8_by_16_sprites:
+  jsl disable_nmi_no_store
   LDX #$03
   LDY #$00
 traslation_start:
@@ -172,7 +173,8 @@ second_half_of_sprites:
   TAY
   BEQ :+
   JMP second_half_of_sprites
-: RTL
+: jsl enable_nmi
+  RTL
 
 
 

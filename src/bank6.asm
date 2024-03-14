@@ -319,23 +319,28 @@ vmdata_write_return:
   LDX $0E
 ;   LDA #$30
 ;   STA PpuControl_2000
-: nops 5
+; : 
+  nops 5
   LDA RDNMI ; PpuStatus_2002
-  LDA $0320,X
-  INX
-  STA VMADDH ; PpuAddr_2006
-  LDA $0320,X
-  STA VMADDL ; PpuAddr_2006
-  CLC
-  ADC #$08
-  ORA #$C0
-  STA $0320,X
-  DEX
-  LDA $0330,Y
-  INY
-  STA VMDATAL ; PpuData_2007
-  DEC $08
-  BNE :-
+
+  JSL rygar_attribute_scroll_write
+  nops 29
+;   LDA $0320,X
+;   INX
+;   STA VMADDH ; PpuAddr_2006
+;   LDA $0320,X
+;   STA VMADDL ; PpuAddr_2006
+;   CLC
+;   ADC #$08
+;   ORA #$C0
+; ;   Always Attributes
+;   STA $0320,X
+;   DEX
+;   LDA $0330,Y
+;   INY
+;   STA VMDATAL ; PpuData_2007
+;   DEC $08
+;   BNE :-
   STY $0F
   INC $0E
   INC $0E
@@ -1297,15 +1302,18 @@ vmdata_write:
   BMI :++
   LSR $08
   JSR replacement_8d34
+
+  ; check for palette writes
   CMP #$3F
   BNE :+
   JSL write_palette_data
-: JSR $8D57
+: 
+  JSR $8D57
   BNE :+
   JMP nes_8CB6
 
 : AND #$7F
-  BEQ :+
+  BEQ :++
   LSR $08
   JSR replacement_8d34
   CMP #$3F
@@ -1340,7 +1348,7 @@ replacement_8d34:
   STA VMADDL
   INX
   STX $0E
-
+  ; Return with the VM ADDH in the A to check if we wrote palette data
   PLA
 
   RTS

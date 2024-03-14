@@ -567,7 +567,8 @@
   TAX
   BEQ :+
   JSR @handle_vmdata_writes
-  nops 18
+  LDA #$04
+  nops 16
 ;   LDA $05
 ;   STA VMADDH ; PpuAddr_2006
 ;   LDA $04
@@ -586,16 +587,18 @@
 
   LDA $06
   STA VMAIN ; PpuControl_2000
-  nops 3 ; LDA PpuStatus_2002
-  LDA $05
-  STA VMADDH ; PpuAddr_2006
-  LDA $04
-  STA VMADDL ; PpuAddr_2006
-: LDA ($08),Y
-  INY
-  STA VMDATAL ; PpuData_2007
-  DEX
-  BNE :-
+;   nops 3 ; LDA PpuStatus_2002
+  JSR @handle_vmdata_writes
+  nops 19
+;   LDA $05
+;   STA VMADDH ; PpuAddr_2006
+;   LDA $04
+;   STA VMADDL ; PpuAddr_2006
+; : LDA ($08),Y
+;   INY
+;   STA VMDATAL ; PpuData_2007
+;   DEX
+;   BNE :-
   
 .byte $98, $18, $65, $08, $85, $08, $90, $02
 .byte $E6, $09, $4C, $8A, $CE, $A2, $01, $B5, $06, $30, $05, $49, $FF, $18, $69, $01
@@ -1508,30 +1511,80 @@
 
 ; handle VMDATA Writes and hijack attributes
 @handle_vmdata_writes:
-    LDA $05
-    STA VMADDH
     LDA $04
     STA VMADDL
-
+    LDA $05
+    STA VMADDH
+    AND #$03
+    CMP #$03
+    BNE :+
+    LDA $04
+    CMP #$C0
+    BCC :+
+    JMP @handle_attribute_write
 :   LDA ($08),Y
     INY
     STA VMDATAL ; PpuData_2007
     DEX
     BNE :-
-    LDA #$04
+:   
 
     RTS
 
+@handle_attribute_write:
+
+
+    ; STX ATTR_NES_SIZE
+    ; PHY
+;     STZ ATTR_NES_CURR_CALC_OFFSET
+;     LDX ATTR_NES_HAS_VALUES
+;     BEQ :++
+; :   
+;     LDY ATTR_NES_CURR_CALC_OFFSET
+;     LDA ATTR_NES_VM_COUNT, Y
+;     CLC
+;     ADC #$03
+;     ADC ATTR_NES_CURR_CALC_OFFSET
+;     STA ATTR_NES_CURR_CALC_OFFSET
+;     DEX
+;     BNE :-
+;     LDX ATTR_NES_CURR_CALC_OFFSET
+
+; :   
+    LDA $04
+    STA ATTR_NES_VM_ADDR_LB
+    LDA $05
+    STA ATTR_NES_VM_ADDR_HB
+    LDA #$00
+    STA ATTR_NES_VM_COUNT
+    ; LDY #$00
+;   PLY
+
+:   LDA ($08),Y
+    STA ATTR_NES_VM_ATTR_START - 3, Y
+    INY
+    INC ATTR_NES_VM_COUNT
+    DEX
+    BNE :-
+
+    INC ATTR_NES_HAS_VALUES
+    PHK
+    JSL convert_nes_attributes_and_immediately_dma_them
+    PLB
+
+    LDA #$04
+
+    RTS
 ; .byte $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF
 ; .byte $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00
 ; .byte $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF
-.byte $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF ;, $00
-.byte $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF
-.byte $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00
-.byte $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF
-.byte $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00
-.byte $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF
-.byte $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00
+; .byte $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00
+; .byte $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF
+; .byte $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00
+; .byte $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF
+; .byte $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00
+; .byte $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF;, $00, $FF;, $00, $FF
+.byte $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00;, $FF, $00, $FF, $00
 .byte $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF
 .byte $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00
 
