@@ -4,6 +4,7 @@
 ; $0320,$0F is start of data
 rygar_vertical_scroll_atrribute_handle:
   ; 
+
   LDA $08
   STA ATTR_NES_VM_COUNT
 
@@ -31,7 +32,8 @@ rygar_vertical_scroll_atrribute_handle:
   
   PLY
   STX $0F
-  INC ATTR_NES_HAS_VALUES
+  LDA #$01
+  STA ATTR_NES_HAS_VALUES
   JSL convert_nes_attributes_and_immediately_dma_them
   LDA #$00
   RTL
@@ -61,7 +63,8 @@ rygar_scroll_atrribute_handle_8d67:
   lda #$00
   STA ATTR_NES_VM_ATTR_START, Y
   PLY
-  INC ATTR_NES_HAS_VALUES
+  LDA #$01
+  STA ATTR_NES_HAS_VALUES
   JSL convert_nes_attributes_and_immediately_dma_them
   INC $0F
   RTL
@@ -253,14 +256,14 @@ convert_nes_attributes_and_immediately_dma_them:
   RTL
 
 ; converts attributes stored at 9A0 - A07 to attribute cache
-; When we write to VRAM 23C0 - 23FF or 27C0 - 27FF we also must write it to 9A4 - 9E3 
-; and 9e8 - a27
 check_and_copy_nes_attributes_to_buffer:
   LDA ATTR_NES_HAS_VALUES
   BNE convert_attributes_inf
   RTS
   
 convert_attributes_inf:
+
+  
   PHK
   PLB
   LDX #$00

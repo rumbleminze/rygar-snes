@@ -218,9 +218,26 @@ initialize_registers:
 
   JSR dma_oam_table
   ; JSR disable_attribute_buffer_copy
-  ; JSR check_and_copy_attribute_buffer
+  
+  LDA ATTR_WORK_BYTE_0
+  PHA
+  LDA ATTR_WORK_BYTE_1
+  PHA
+  LDA ATTR_WORK_BYTE_2
+  PHA
+  LDA ATTR_WORK_BYTE_3 
+  PHA
+  JSR check_and_copy_attribute_buffer
   ; JSR write_one_off_vrams
   JSR check_and_copy_nes_attributes_to_buffer
+  pla
+  sta ATTR_WORK_BYTE_3
+  pla
+  sta ATTR_WORK_BYTE_2
+  pla
+  sta ATTR_WORK_BYTE_1
+  pla 
+  sta ATTR_WORK_BYTE_0
   RTL
 
 clearvm:
