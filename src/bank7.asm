@@ -1527,8 +1527,6 @@
     STA VMDATAL ; PpuData_2007
     DEX
     BNE :-
-:   
-
     RTS
 
 @handle_attribute_write:

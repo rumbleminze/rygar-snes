@@ -1299,31 +1299,147 @@ vmdata_write_return:
 
 ; BD00 - bank 6
 vmdata_write:
-  BMI :++
+  BMI negative_vmdata_write
   LSR $08
-  JSR replacement_8d34
 
-  ; check for palette writes
+  ; this replaces the call to 8d34
+  PHA
+  LDA $0C
+  AND #$7B
+  BCC :+
+  ORA #$04
+: JSL update_ppu_control_values_from_a 
+  PLA
+
+  LDX $0E
+  LDA $0320,X
   CMP #$3F
   BNE :+
   JSL write_palette_data
+  ; skip going to 8d57 by adjusting these
+  INC $0E
+  INC $0E
+  LDA $0F
+  clc
+  ADC $08
+  clc
+  STA $0F
+  LDA #$00
+  BRA standard_path
 : 
+  AND #$03
+  CMP #$03
+  BNE :+
+  ; possibly attributes
+  INX 
+  LDA $0320,X
+  DEX
+  CMP #$C0
+  BCC :+
+  ;attributes
+  JSL rygar_vertical_scroll_atrribute_handle
+  BRA standard_path
+
+: LDA $0320,X
+  STA VMADDH
+  INX
+  LDA $0320,X
+  STA VMADDL
+  INX
+  STX $0E
   JSR $8D57
+
+standard_path:
   BNE :+
   JMP nes_8CB6
 
-: AND #$7F
-  BEQ :++
+
+
+negative_vmdata_write:
+; old version
+  ; AND #$7F
+  ; BEQ $A7BD77
+  ; LSR $08
+  ; JSR $BD7A
+  ; CMP #$3F
+  ; TSB $22
+  ; BIT $2084
+  ; JSR $8D67
+  ; INC $0F
+  ; BNE $A7BD77
+  ; JMP $8CB6
+  ; JMP $8CFA
+  ; PHA
+  ; LDA $0C
+  ; AND #$7B
+  ; COP #$09
+  ; TSB $22
+  ; STA ($87,S),Y
+  ; JSR $A668
+  ; ASL $20BD
+  ; ORA $48,S
+  ; STA $2117
+  ; INX
+  ; LDA $0320,X
+  ; STA $2116
+  ; INX
+  ; STX $0E
+  ; PLA
+  ; RTS
+
+
+  AND #$7F
+  BEQ done_with_vm_write
   LSR $08
-  JSR replacement_8d34
+
+  PHA
+  LDA $0C
+  AND #$7B
+  BCC :+
+  ORA #$04
+: JSL update_ppu_control_values_from_a 
+  PLA
+
+  LDX $0E
+  LDA $0320,X
   CMP #$3F
   BNE :+
   JSL write_palette_data
-: JSR $8D67
+  ; skip going to 8d67 by adjusting these
   INC $0F
+  BRA done_with_vm_write
+: 
+  AND #$03
+  CMP #$03
   BNE :+
+  ; possibly attributes
+  INX 
+  LDA $0320,X
+  DEX
+  CMP #$C0
+  BCC :+
+  ;attributes
+  JSL rygar_scroll_atrribute_handle_8d67
+  BRA done_with_vm_write
+  
+: LDA $0320,X
+  STA VMADDH
+  INX
+  LDA $0320,X
+  STA VMADDL
+  INX
+  STX $0E
+  JSR $8D67
+  INC $0F
+  BNE done_with_vm_write
   JMP nes_8CB6
-: JMP vmdata_write_return
+
+done_with_vm_write:
+  JMP vmdata_write_return
+
+
+
+
 
 replacement_8d34:
   ; check if we're writing H of V
@@ -1332,43 +1448,37 @@ replacement_8d34:
   AND #$7B
   BCC :+
   ORA #$04
-: JSL update_ppu_control_values_from_a 
-  ; STA $2000
-
+: JSL update_ppu_control_values_from_a
   PLA
-  nops 2    ; LDX $2002
-
   LDX $0E
   LDA $0320,X
   PHA
-
   STA VMADDH
   INX
   LDA $0320,X
   STA VMADDL
   INX
   STX $0E
-  ; Return with the VM ADDH in the A to check if we wrote palette data
   PLA
-
   RTS
 
 
+
 ; .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 ; .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF; , $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+; .byte $FF, $FF, $FF, $FF, $FF, $FF , $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 ; .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 ; .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 ; .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+; .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+; .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+; .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+; .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF; , $FF
+; .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+; .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+; .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+; .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+; .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 
 
