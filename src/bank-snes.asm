@@ -360,7 +360,8 @@ dma_values:
   .include "scrolling.asm"
   .include "attributes.asm"
   .include "hdma_scroll_lookups.asm"
-
+  .include "2a03_conversion.asm"
+  
 .segment "PRGA0C"
 fixeda0:
 .include "bank7.asm"
