@@ -184,7 +184,7 @@ do_intro:
 
     JSL load_tiles
 
-
+    JSL enable_pause_window
     JSR write_intro_palette
     JSR write_intro_tiles
     ; JSL set_middle_attributes_to_palette_0
@@ -200,6 +200,7 @@ do_intro:
     DEX
     BNE :--
 
+    JSL disable_pause_window
     LDA INIDISP_STATE
     ORA #$8F
     STA INIDISP_STATE

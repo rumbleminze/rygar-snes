@@ -176,11 +176,19 @@ initialize_registers:
   STZ ATTR_NES_VM_ADDR_HB
   STZ ATTR_NES_VM_ADDR_LB
   STZ ATTR_NES_VM_ATTR_START
+  STZ ATTR2_NES_HAS_VALUES
+  STZ ATTR2_NES_VM_ADDR_HB
+  STZ ATTR2_NES_VM_ADDR_LB
+  STZ ATTR2_NES_VM_ATTR_START
+  STZ ATTRIBUTE2_DMA
   STZ ATTRIBUTE_DMA
   STZ COL_ATTR_HAS_VALUES
+  STZ COL2_ATTR_HAS_VALUES
   STZ COLUMN_1_DMA
+  STZ COLUMN_2_DMA
   JSL upload_sound_emulator_to_spc
   ; JSL load_base_tiles
+  JSR setup_pause_window 
   JSR do_intro
   JSR clearvm_to_12
 
@@ -228,6 +236,7 @@ initialize_registers:
   LDA ATTR_WORK_BYTE_3 
   PHA
   JSR check_and_copy_attribute_buffer
+  JSR check_and_copy_column_attributes_to_buffer
   ; JSR write_one_off_vrams
   JSR check_and_copy_nes_attributes_to_buffer
   pla
@@ -359,9 +368,11 @@ dma_values:
   .include "hardware-status-switches.asm"
   .include "scrolling.asm"
   .include "attributes.asm"
+  .include "attributes2.asm"
   .include "hdma_scroll_lookups.asm"
   .include "2a03_conversion.asm"
-  
+  .include "windows.asm"
+
 .segment "PRGA0C"
 fixeda0:
 .include "bank7.asm"

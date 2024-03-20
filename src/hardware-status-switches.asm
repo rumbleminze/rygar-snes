@@ -146,12 +146,19 @@ update_ppu_mask_store_to_1e:
     ; turns on BG and sprites
     LDA #$11
     STA TM_STATE
+    JSL disable_pause_window
     RTL
 
 update_values_for_ppu_mask:
     STZ TM_STATE
     ; we only care about bits 10 (sprites and 08 bg)
     LDA PPU_MASK_STATE
+    AND #$06
+    BNE :+
+    JSL enable_pause_window
+    BRA :++
+:   JSL disable_pause_window
+:   LDA PPU_MASK_STATE
     AND #$10
     CMP #$10
     BNE :+

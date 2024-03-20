@@ -105,22 +105,25 @@
 ; .byte $00, $00, $1E, $00, $0A, $00, $06, $06
 .byte $00, $00, $1E, $0F, $0A, $0F, $18, $18
 
-  nops 3 ; LDX PpuStatus_2002
-  STA VMADDH ; PpuAddr_2006
-  LDA #$00
-  STA VMADDL ; PpuAddr_2006
-  LDA #$00
-  LDX #$03
-  LDY #$C0
-  JSR @c0c9
-  ; 40 more for attributes
-  LDY #$40
-@c0c9:
-: STA VMDATAL ; PpuData_2007
-  DEY
-  BNE :-
-  DEX
-  BPL :-
+  JSL clearvm_to_12_long
+  nops 27 
+  ; LDX PpuStatus_2002
+;   nops 3
+;   STA VMADDH ; PpuAddr_2006
+;   LDA #$00
+;   STA VMADDL ; PpuAddr_2006
+;   LDA #$00
+;   LDX #$03
+;   LDY #$C0
+;   JSR @c0c9
+;   ; 40 more for attributes
+;   LDY #$40
+; @c0c9:
+; : STA VMDATAL ; PpuData_2007
+;   DEY
+;   BNE :-
+;   DEX
+;   BPL :-
   RTS
 
 .byte $00, $01, $02, $03, $04, $05, $06, $07, $0A, $A8, $C8, $68, $85
