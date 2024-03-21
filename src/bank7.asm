@@ -85,10 +85,12 @@
   nops 1
 
   LDX #$07
-: LDA $C0AB,X
-  STA $C4,X
-  DEX
-  BPL :-
+  jsr @load_default_inventory
+  nops 5
+; : LDA $C0AB,X
+;   STA $C4,X
+;   DEX
+;   BPL :-
   JMP $C08F
 
 .byte $31, $39, $38, $37, $20, $63, $6F, $70, $79, $72, $69, $67, $68, $74
@@ -102,8 +104,8 @@
 ; MAX HP
 ; HP
 ; original values
-; .byte $00, $00, $1E, $00, $0A, $00, $06, $06
-.byte $00, $00, $1E, $0F, $0A, $0F, $18, $18
+.byte $00, $00, $1E, $00, $0A, $00, $06, $06
+; .byte $00, $00, $1E, $0F, $0A, $0F, $18, $18
 
   JSL clearvm_to_12_long
   nops 27 
@@ -1617,6 +1619,27 @@
     PLB
     PLP
     RTS
+
+@load_default_inventory:
+    LDA KONAMI_CODE_ENABLED
+    BNE @load_konami_code_inventory
+
+  : LDA $C0AB,X
+    STA $C4,X
+    DEX
+    BPL :-  
+    rts
+
+@konami_inventory:
+.byte $F0, $F0, $00, $07, $00, $00, $1E, $0F, $0A, $0F, $17, $17
+
+@load_konami_code_inventory:    
+    LDX #$0B
+  : LDA @konami_inventory,X
+    STA $C0,X
+    DEX
+    BPL :-  
+    rts
 ; .byte $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF
 ; .byte $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00
 ; .byte $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF
@@ -1626,7 +1649,7 @@
 ; .byte $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF
 ; .byte $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00
 ; .byte $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF;, $00, $FF;, $00, $FF
-.byte $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00;, $FF, $00, $FF, $00
+.byte $FF, $00, $FF, $00, $FF, $00, $FF, $00;, $FF, $00, $FF, $00, $FF, $00, $FF, $00
 .byte $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF
 .byte $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00, $FF, $00
 

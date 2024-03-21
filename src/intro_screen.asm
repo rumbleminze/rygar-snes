@@ -15,7 +15,7 @@ intro_screen_data:
 
 ; .byte $4C, $23, $22, $34, $3c, $31, $3b, $34, $41, $42, $ff             ; MEMBLERS
 
-.byte $78, $23, $d9, $cc, $dd, $00, $68, $81, $69, $ff ; Version (REV0)
+.byte $78, $23, $d9, $cc, $dd, $00, $69, $81, $68, $ff ; Version (REV0)
 .byte $ff, $ff
 
 write_intro_palette:
@@ -133,6 +133,7 @@ write_intro_palette:
 
     RTS
 
+
 write_intro_tiles:
     LDY #$00
 
@@ -164,6 +165,8 @@ exit_intro_write:
     RTS
 
 do_intro:
+    lda #$01
+    sta NMITIMEN
     LDA VMAIN_STATE
     AND #$0F
     STA VMAIN
@@ -196,6 +199,9 @@ do_intro:
   : LDA RDNMI
   : LDA RDNMI
     AND #$80
+
+    jsr check_for_code_input
+
     BEQ :-
     DEX
     BNE :--

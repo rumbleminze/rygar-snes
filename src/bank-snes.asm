@@ -361,6 +361,7 @@ dma_values:
   .byte $00, $12
   
   .include "intro_screen.asm"
+  .include "konamicode.asm"
   .include "palette_updates.asm"
   .include "palette_lookup.asm"
   .include "sprites.asm"
