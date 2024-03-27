@@ -1,4 +1,4 @@
-.segment "PRGA8"
+.segment "PRGAE"
 
 ; Read Flags
 .DEFINE MSU_STATUS      $2000

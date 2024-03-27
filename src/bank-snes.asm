@@ -191,7 +191,7 @@ initialize_registers:
   JSR setup_pause_window 
   JSR do_intro
   JSR clearvm_to_12
-
+  JSR write_default_palettes
   LDA #$A1
   PHA
   PLB 

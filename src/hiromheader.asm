@@ -1,6 +1,6 @@
 .segment "HEADER"
       
-.byte "RYGAR SNES V1.0      " ; ROM name, must be 21 chars
+.byte "RYGAR SNES V1.1      " ; ROM name, must be 21 chars
 
                 
 .segment "ROMSPEC"

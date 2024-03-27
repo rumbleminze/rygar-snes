@@ -21,8 +21,9 @@ VOFS_HB             = $08A5
 REUSABLE_CALC_BYTE  = $08A8
 LEVEL_SELECT_INDEX  = $08A9
 CHEATS_ENABLED      = $08AA
-CURRENT_ATTRIBUTES  = $08B0
 
+CURRENT_ATTRIBUTES  = $08B0
+USE_ARCADE_SPRITE   = $081B ; gets set to #$03 so that A8 goes to AB instead
 ; mostly actual nes stuff above
 ; all my stuff below
 
@@ -33,6 +34,7 @@ FULL_ATTRIBUTE_COPY_SRC_LB = $7D
 FULL_ATTRIBUTE_COPY_SRC_HB = $7E
 FULL_ATTRIBUTE_COPY_HB = $7F
 
+MSU_SELECTED        = $081C
 PPU_CURR_VRAM_ADDR  = $0992
 PPU_TILE_COUNT      = $0994
 PPU_TILE_ATTR       = $0996

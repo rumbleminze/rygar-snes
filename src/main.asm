@@ -33,3 +33,6 @@
 .include "tiles0.asm"
 .include "tiles1.asm"
 .include "tiles2.asm"
+.include "tiles0-new-tiles.asm"
+.include "tiles1-new-tiles.asm"
+.include "tiles2-new-tiles.asm"

@@ -25,11 +25,13 @@
 
 ; DEATH Oh No!  Get gud
   LDA #$11
+  jsr rygar_defeated
   JSR $CD00 ; don't know what this does
 
   ; clear out the full tilemap to #$00
   JSL clearvm_to_12_long
-  nops 6
+  nops 3
+  ; nops 3
 ;   LDA #$20
 ;   JSR $C0B3
 ;   LDA #$24
@@ -62,7 +64,16 @@
 .byte $27, $4A, $A9, $10, $90, $02, $A9, $20, $25, $C1, $F0, $3C, $B0, $11, $A9, $EF
 .byte $25, $C1, $85, $C1, $A9, $22, $20, $00, $CD, $A5, $CA, $85, $CB, $10, $29, $A9
 .byte $E0, $25, $C0, $C9, $E0, $D0, $21, $25, $C1, $C9, $E0, $D0, $1B, $A5, $1C, $4A
-.byte $C9, $0C, $D0, $14, $A9, $1F, $20, $00, $CD, $A9, $02, $05, $A9, $85, $A9, $A9
+.byte $C9, $0C, $D0, $14
+
+; msu-1 hook
+; .byte $A9, $1F, $20, $00, $CD
+; they also take out a902, but that's too many bytes?
+jsr play_flute
+nop
+nop
+
+.byte $A9, $02, $05, $A9, $85, $A9, $A9
 .byte $49, $85, $4B, $A9, $03, $8D, $0A, $03, $20, $D8, $A9, $A9, $68, $85, $08, $A6
 .byte $2D, $A4, $C3, $F0, $21, $A9, $78, $9D, $01, $02, $A9, $03, $9D, $02, $02, $A9
 .byte $78, $9D, $00, $02, $A5, $08, $9D, $03, $02, $18, $A9, $F8, $65, $08, $85, $08
@@ -122,8 +133,13 @@
 .byte $A5, $11, $85, $42, $29, $F8, $85, $11, $A9, $01, $45, $0C, $85, $0C, $E6, $41
 .byte $60, $A6, $1D, $BD, $FA, $87, $4A, $BD, $AE, $87, $20, $0F, $8A, $B0, $4E, $A5
 .byte $2B, $69, $08, $85, $2B, $20, $CD, $89, $A5, $2B, $10, $41, $A5, $1C, $4A, $AA
-.byte $A5, $1D, $C9, $47, $D0, $04, $A9, $0F, $D0, $03, $BD, $2E, $85, $20, $00, $CD
+.byte $A5, $1D, $C9, $47, $D0, $04, $A9, $0F, $D0, $03
 
+; $2784FA - MSU-1 hijack
+; .byte $BD, $2E, $85
+jsr msu_play_routine
+
+.byte $20, $00, $CD
 
 ; 8500 - bank 6
 .byte $A9, $00, $85, $18, $85, $19, $8D, $B2, $04, $8D, $42, $05, $8D, $18, $06, $8D
@@ -150,7 +166,15 @@
 .byte $00, $A6, $00, $BD, $92, $88, $99, $30, $03, $C8, $A9, $03, $85, $01, $8A, $0A
 .byte $0A, $AA, $BD, $D1, $88, $99, $30, $03, $E8, $C8, $C6, $01, $D0, $F4, $BD, $D1
 .byte $88, $30, $06, $A2, $FF, $86, $00, $09, $80, $99, $30, $03, $C8, $E6, $00, $D0
-.byte $D0, $84, $0F, $60, $A9, $26, $20, $00, $CD, $A9, $00, $A2, $1F, $9D, $00, $03
+.byte $D0, $84, $0F, $60
+
+; MSU-1 hijack $278654
+; .byte $A9, $26, $20, $00, $CD
+jsr mute_nsf_msu_routine
+nop
+nop
+
+.byte $A9, $00, $A2, $1F, $9D, $00, $03
 .byte $CA, $10, $FA, $18, $A9, $00, $20, $0F, $8A, $A9, $06, $B0, $0D, $A9, $00, $20
 .byte $CD, $89, $A9, $E1, $25, $0D, $85, $0D, $A9, $05, $8D, $01, $03, $60, $00, $00
 .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $03, $03, $03, $03, $03, $03
@@ -386,7 +410,7 @@ vmdata_write_return:
 
   LDX $0F
   LDA $0330,X
-: STA $2007
+: STA VMDATAL
   DEC $08
   BMI :-
   INC $0F
@@ -912,7 +936,13 @@ vmdata_write_return:
 
 
 ; A800 - bank 6
-.byte $18, $85, $19, $A9, $10, $20, $00, $CD, $A2, $00, $86, $28, $E8, $8E, $00, $03
+.byte $18, $85, $19
+; msu-1 hook for argool
+; .byte $A9, $10, $20, $00, $CD
+jsr play_argool
+nops 2
+
+.byte $A2, $00, $86, $28, $E8, $8E, $00, $03
 .byte $E6, $41, $60, $C6, $2B, $10, $27, $A9, $1E, $05, $0D, $85, $0D, $A9, $00, $85
 .byte $2B, $85, $18, $85, $19, $85, $2B, $8D, $33, $05, $A9, $02, $8D, $23, $05, $A9
 .byte $40, $8D, $F3, $04, $8D, $13, $05, $A9, $A2, $8D, $63, $05, $E6, $41, $60, $A5
@@ -1024,31 +1054,233 @@ vmdata_write_return:
 .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
+; Read Flags
+.DEFINE MSU_STATUS      $2000
+.DEFINE MSU_READ        $2001
+.DEFINE MSU_ID          $2002   ; 2002 - 2007
+
+; Write flags
+.DEFINE MSU_SEEK        $2000
+.DEFINE MSU_TRACK       $2004   ; 2004 - 2005
+.DEFINE MSU_VOLUME      $2006
+.DEFINE MSU_CONTROL     $2007
+
+; MSU1 area:
+play_argool:
+LDA #$10		; load argool saved track-id
+JSR resume_argool
+JSR $CD00		; native code
+RTS
+
+play_flute:
+LDA #$1F		; load flute of pegasus track-id
+JSR resume_flute
+JSR $CD00		; native code
+RTS
+
+rygar_defeated:
+LDA #$11		; load rygar defeated track-id
+JMP resume_rygar
+
+msu_play_routine:
+LDA $852E,X		; native code, loads music track id
+resume_rygar:
+resume_flute:
+resume_argool:
+STA $7E01CF		; save original nsf track-id to RAM, using this for debugging purposes
+
+; check for MSU
+PHA
+LDA MSU_SELECTED
+BEQ no_msu
+LDA MSU_ID
+CMP #$53
+BEQ msu_available
+no_msu:
+PLA 
+RTS
+
+msu_available:
+PLA
+JSR track_remap ; remap track id routine
+
+STZ MSU_VOLUME		; drop volume to zero; reduce Static/noise during track changes in sd2snes
+STA MSU_TRACK		; store current valid NSF track-ID
+STZ $2005		; must zero out high byte or current msu-1 track will not play !!!
+
+msu_status:	; check msu ready status (required for sd2snes hardware compatibility)
+bit MSU_SEEK
+bvs msu_status
+
+LDA MSU_SEEK		; load MSU-1 track status
+AND #$08		; isolate PCM track present byte
+CMP #$08		; is PCM track present after attempting to play using STA MSU_TRACK?
+BEQ end_routine_nsf ; if PCM missing, stop any currently playing msu-1 music and default to nsf
+
+LDA $7E01CD		; load loop status
+STA MSU_CONTROL		; write current loop value
+LDA #$FF		; load max msu-1 volume byte
+STA MSU_VOLUME		; write max volume value
+STA $7E01CC		; set mute NSF flag (writing FF in RAM location)
+LDA #$26		; PCM is present, mute NSF value and play msu-1
+RTS
+end_routine_nsf:
+STZ MSU_CONTROL		; mute msu-1
+LDA $7E01CF		; no pcm found, default to original nsf music
+RTS
+
+track_remap:
+CMP #$03		; this Sueru Mountain?
+BNE chk_04
+JSR set_loop
+LDA #$01		; Sueru Mountain remapped as track-01
+JMP remap_leave
+
+chk_04:
+CMP #$04		; this Gran Mountain?
+BNE chk_05
+JSR set_loop
+LDA #$02		; Gran Mountain remapped as track-02
+JMP remap_leave
+
+chk_05:
+CMP #$05		; this Garloz?
+BNE chk_06
+JSR set_loop
+LDA #$03		; Garloz remapped as track-03
+JMP remap_leave
+
+chk_06:
+CMP #$06		; this Den of Sagila?
+BNE chk_07
+JSR set_loop
+LDA #$04		; Den of Sagila remapped as track-04
+JMP remap_leave
+
+chk_07:
+CMP #$07		; this Palace of Dorago
+BNE chk_08
+JSR set_loop
+LDA #$05		; Palace of Dorago as track-05
+JMP remap_leave
+
+chk_08:
+CMP #$08		; this Lapis?
+BNE chk_09
+JSR set_loop
+LDA #$06		; Lapis re-mapped as track-06
+JMP remap_leave
+
+chk_09:
+CMP #$09		; this Sky Castle
+BNE chk_0A
+JSR set_loop
+LDA #$07		; Sky Castle re-mapped as track-07
+JMP remap_leave
+
+chk_0A:
+CMP #$0A		; this Tower of Garba
+BNE chk_0B
+JSR set_loop
+LDA #$08		; Tower of Garba re-mapped as track-08
+JMP remap_leave
+
+chk_0B:
+CMP #$0B		; this Boss Roar
+BNE chk_0C
+JSR set_loop
+LDA #$0F		; Boss Roar re-mapped as track-15
+JMP remap_leave
+
+chk_0C:
+CMP #$0C		; this Legendary God
+BNE chk_10
+JSR set_loop
+LDA #$09		; Legendary God re-mapped as track-09
+JMP remap_leave
+
+chk_10:
+CMP #$10		; this Argool Saved?
+BNE chk_11
+JSR set_loop
+LDA #$0A		; Argool Saved re-mapped as track-10
+JMP remap_leave
+
+chk_11:
+CMP #$11		; this Rygar Defeated
+BNE chk_1F
+JSR set_no_loop
+LDA #$0B		; Rygar Defeated re-mapped as track-11
+JMP remap_leave
+
+chk_1F:
+CMP #$1F		; this Flute of Pegasus followed by Gran Mountain music on same track?
+BNE chk_27
+JSR set_loop
+LDA #$0C		; Flute of Pegasus re-mapped as track-12
+JMP remap_leave
+
+chk_27:
+CMP #$27		; this Primeval Mountain?
+BNE chk_28
+JSR set_loop
+LDA #$0D		; Primeval Mountain re-mapped as track-13
+JMP remap_leave
+
+chk_28:
+CMP #$28		; this Eruga's Forest
+BNE do_nothing
+JSR set_loop
+LDA #$0E		; Eruga's Forest re-mapped as track-14
+JMP remap_leave
+
+do_nothing:
+LDA #$00		; write zero to remapped RAM location, nothing to do
+
+remap_leave:
+STA $7E01CE		; save remapped nsf track-id to RAM
+RTS
+
+set_loop:		; routine to set msu-1 track to loop
+LDA #$03
+STA $7E01CD		; store current loop status to RAM for later retrieval
+RTS
+
+set_no_loop:	; routine to set msu-1 track not to loop
+LDA #$01
+STA $7E01CD		; store current loop status to RAM for later retrieval
+RTS
+
+mute_nsf_msu_routine: ; mutes nsf or msu-1 music after going through door
+STZ MSU_CONTROL	; mute msu-1
+LDA #$26	; native code, mutes nsf
+JSR $CD00	; native code
+RTS
 
 ; AE00 - bank 6
-.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
 
 ; AF00 - bank 6
-.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00;, $00, $00, $00, $00, $00
 .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00

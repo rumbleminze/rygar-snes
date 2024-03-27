@@ -54,6 +54,13 @@ load_tiles:
     AND #$07
     CLC
     ADC #$A8
+
+    ; adjust for arcade sprits
+    CMP #$A8
+    BNE :+
+    CLC
+    ADC USE_ARCADE_SPRITE
+:   CLC
     STA A1B5
 
     LDA #$18

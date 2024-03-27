@@ -72,10 +72,10 @@ loop:
     rts
 
 code_effect:
-    : LDA RDNMI
+    LDA RDNMI
     : LDA RDNMI
     BEQ :-
-    
+
     AND #$80
     STZ CGADD    
     LDA #$00

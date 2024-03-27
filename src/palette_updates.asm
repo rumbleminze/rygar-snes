@@ -78,3 +78,19 @@ zero_all_palette:
   BNE :-
 
   RTL
+
+snes_sprite_palatte:
+; .byte $D6, $10, $FF, $7F, $D6, $10, $00, $00, $91, $29, $CE, $39, $5B, $29, $35, $3A
+; .byte $77, $46, $B5, $56, $B9, $4E, $FB, $56, $3D, $5F, $7B, $6F, $FC, $7F, $FF, $7F
+.byte $1F, $00, $FF, $7F, $53, $08, $00, $00, $91, $29, $CE, $39, $5B, $29, $35, $3A
+.byte $77, $46, $B5, $56, $B9, $4E, $FB, $56, $3D, $5F, $7B, $6F, $D7, $18, $FF, $7F
+write_default_palettes:
+  LDA #$80
+  sta CGADD
+  LDY #$00
+: LDA snes_sprite_palatte, y
+  STA CGDATA
+  INY
+  CMP #$20
+  BNE :-
+  rts
